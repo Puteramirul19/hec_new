@@ -98,9 +98,17 @@ namespace Hec.Web.Areas.Public.Controllers
             // Get random appliance tips
             List<TipsList> energyTips = new List<TipsList>();
 
+            // Check if top5appliance is null
+            if (top5appliance == null)
+            {
+                return Json(energyTips); // Return empty list if null
+            }
+
             foreach (var appl in top5appliance)
             {
                 var app = await db.Appliances.Where(x => x.Name == appl.category).FirstOrDefaultAsync();
+                if (app == null) continue; // Skip if appliance not found
+
                 var tip = db.Tips.Where(t => t.TipCategoryId == app.TipCategoryId).OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
                 if (tip != null)
@@ -166,9 +174,15 @@ namespace Hec.Web.Areas.Public.Controllers
         public ActionResult GetHouseType(string houseType)
         {
             var houseTypes = db.HouseTypes.Where(x => x.HouseTypeCode == houseType).FirstOrDefault();
+    
+            if (houseTypes == null)
+            {
+                return Json(new { houseTypes = (object)null, houseCategories = (object)null });
+            }
+    
             var houseCategories = db.HouseCategories.Where(x => x.Id == houseTypes.HouseCategoryId).FirstOrDefault();
-
+            
             return Json(new { houseTypes = houseTypes, houseCategories = houseCategories });
         }
-    }
-}
+            }
+        }
